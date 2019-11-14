@@ -1,6 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-
+// const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   entry: './index.js',
@@ -37,4 +37,6 @@ module.exports = {
       template: path.join(__dirname, 'index.html'),
     }),
   ],
+  // target: 'node',
+  // externals: [nodeExternals()],
 }
