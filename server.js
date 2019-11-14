@@ -7,7 +7,7 @@ const sequalize = require("./src/database/connection");
 const Product = require("./src/models/Product");
 
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json());
 
 app.listen(port, () => {
