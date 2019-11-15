@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { gql } from 'apollo-boost';
+import { useQuery } from '@apollo/react-hooks';
 import styled from 'styled-components';
 
 const BackgroundContainer = styled.div`
@@ -11,6 +13,7 @@ const BackgroundContainer = styled.div`
 
 const Container = styled.div`
   display: flex;
+  flex-direction: column;
   width: 60%;
   margin: 0 auto;
 `;
@@ -22,35 +25,62 @@ const SearchBox = styled.input`
   padding: 10px 20px;
   font-size: 16px;
   width: 300px;
+`;
+
+const Cart = styled.div`
+  background: #fff;
+  display: flex;
+  width: 300px;
+  margin-top: 20px;
+  flex-direction: column;
+`;
+
+const ProductBox = styled.div`
+  display: flex;
+  align-items: center
+`
+
+const PRODUCTS_QUERY = gql`
+  query {
+    products {
+      brand
+      name
+      image
+      price
+    }
+  }
 `
 
 const Products = () => {
   const [search, setSearch] = useState('');
-
+  const [results, setResults] = useState([]);
+  const { loading, error, data } = useQuery(PRODUCTS_QUERY);
   const handleSearch = e => setSearch(e.target.value);
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/products', {
-        method: 'post',
-        headers: {
-          'Content-Type' : 'application/json',
-        },
-        body: JSON.stringify({
-          name: 'Yogurt', image: 'sadasd', price: '23', brand: 'laive'
-        }),
-      })
-        .then(function(result) {
-          alert(result);
-        })
-        .catch(function(error) {
-          console.log('Request failed', error);
-        });
-  })
+    if (search === '') {
+      setResults([]);
+    }
+    if (data && data.products) {
+      setResults(data.products.filter(c => c.name.includes(search)));
+    }
+  }, [search])
 
   return (
     <BackgroundContainer>
       <Container>
         <SearchBox value={search} onChange={handleSearch} placeholder="Search products" />
+        <Cart>
+          {results.length === 0 ? (
+            <span>
+              carro vacío.
+            </span>
+          ) : (
+              results.map(c => (
+                <span>{c.name}</span>
+              ))
+          )}
+        </Cart>
       </Container>
     </BackgroundContainer>
   )

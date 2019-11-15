@@ -1,22 +1,17 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import Products from './src/components/Products';
-import ThanksPage from './src/components/ThanksPage';
 import ReactDom from 'react-dom';
+import ApolloClient from 'apollo-boost';
+import { ApolloProvider } from 'react-apollo';
+import App from './App';
 
-const App = () => {
+const client = new ApolloClient({ uri: 'http://localhost:4000/graphql' });
+
+const Main = () => {
   return (
-    <Router>
-      <Switch>
-        <Route path="/">
-          <Products />
-        </Route>
-        <Route path="/thankyou">
-          <ThanksPage />
-        </Route>
-      </Switch>
-    </Router>
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
   )
 }
 
-ReactDom.render(<App />, document.getElementById('root'));
+ReactDom.render(<Main />, document.getElementById('root'));

@@ -28,6 +28,7 @@ module.exports = {
     hot: true,
     port: 3000,
   },
+  devtool: 'source-map',
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
