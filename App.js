@@ -1,20 +1,32 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { createGlobalStyle } from 'styled-components'
 import Products from './src/components/Products';
 import ThanksPage from './src/components/ThanksPage';
 
+const GlobalStyle = createGlobalStyle`
+  body {
+    font-family: Helvetica, Arial, 'sans-serif';
+    margin: 0;
+    padding: 0;
+  }
+`
+
 const App = () => {
   return (
-    <Router>
-      <Switch>
-        <Route path="/">
-          <Products />
-        </Route>
-        <Route path="/thankyou">
-          <ThanksPage />
-        </Route>
-      </Switch>
-    </Router>
+    <>
+      <GlobalStyle />
+      <Router>
+        <Switch>
+          <Route path="/">
+            <Products />
+          </Route>
+          <Route path="/thankyou">
+            <ThanksPage />
+          </Route>
+        </Switch>
+      </Router>
+    </>
   )
 }
 
