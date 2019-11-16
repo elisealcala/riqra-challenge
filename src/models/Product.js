@@ -34,4 +34,4 @@ module.exports = sequelize.define("product", {
     allowNull: false,
     defaultValue: 0
   }
-});
+},{ freezeTableName: true , timestamps: false} );

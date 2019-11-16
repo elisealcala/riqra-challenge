@@ -9,4 +9,5 @@ module.exports = sequelize.define('order', {
     autoIncrement: true,
     primaryKey: true
   },
-});
+},
+{ freezeTableName: true , timestamps: false} );
