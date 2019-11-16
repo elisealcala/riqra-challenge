@@ -4,7 +4,10 @@ const config = require("../../config/config.json")[env];
 
 console.log(config);
 
-const sequelize = new Sequelize(config.database, config.username, config.password, config);
+const sequelize = new Sequelize(config.database, config.username, config.password, {
+  ...config,
+  quoteIdentifiers: false
+});
 
 module.exports = sequelize;
 global.sequelize = sequelize;
