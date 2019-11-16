@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 const port = process.env.PORT || 4000;;
 const graphqlHTTP = require('express-graphql');
 const { buildSchema } = require('graphql');
@@ -55,6 +56,14 @@ app.use('/graphql', graphqlHTTP({
   graphiql: true,
 }));
 
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Handles any requests that don't match the ones above
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/dist/index.html'));
+});
+
+
 app.listen(port, () => {
   sequelize
   .authenticate()
@@ -65,17 +74,3 @@ app.listen(port, () => {
     console.error('Unable to connect to the database:', err);
   });
 })
-
-app.post('/api/products', (req, res) => {
-  console.log(req.body);
-  Product.create(req.body)
-      .then(product => res.json(product))
-})
-
-app.get('/api/products', (req, res) => {
-  Product.findAll().then(product => res.json(product))
-})
-
-app.get('/', (req, res, next) => {
-  res.sendStatus(200);
-});
