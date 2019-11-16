@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000;;
 const graphqlHTTP = require('express-graphql');
 const { buildSchema } = require('graphql');
 const bodyParser = require('body-parser');
@@ -75,3 +75,7 @@ app.post('/api/products', (req, res) => {
 app.get('/api/products', (req, res) => {
   Product.findAll().then(product => res.json(product))
 })
+
+app.get('/', (req, res, next) => {
+  res.sendStatus(200);
+});
