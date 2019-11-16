@@ -46,6 +46,8 @@ const Cart = styled.div`
   border-radius: 4px;
   flex-direction: column;
   min-height: 480px;
+  max-height: 480px;
+    overflow: scroll;
 `;
 
 const EmptyContainer = styled.div`
