@@ -43,6 +43,16 @@ const root = {
   products: () => {
     return Product.findAll().then(product => product);
   },
+  deleteShoppingCart: ({ params:{ id }}) => {
+    return Product.update({
+      isInShoppingCart: false,
+      shoppingCartNumber: 0,
+    }, {
+      where: {
+        id: id,
+      }
+    }).then(() => ({ success: true }))
+  },
   addShoppingCart: ({ params: { increment, id } }) => {
     Product.update({
       isInShoppingCart: true,

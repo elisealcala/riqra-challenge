@@ -154,6 +154,16 @@ const SHOPPING_CART_MUTATION = gql`
   }
 `;
 
+const DELETE_SHOPPING_CART = gql`
+  mutation deleteShoppingCart($productId: Int!){
+    deleteShoppingCart(params: {
+      id: $productId
+    }){
+      success
+    }
+  }
+`
+
 const Products = () => {
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
@@ -161,6 +171,8 @@ const Products = () => {
   const shippingDay = "04/04/04";
   const { loading, error, data } = useQuery(PRODUCTS_QUERY);
   const [addShoppingCart] = useMutation(SHOPPING_CART_MUTATION);
+  const [deleteShoppingCart] = useMutation(DELETE_SHOPPING_CART);
+
   const updatePrice = (newResults) => {
     const productsAdded = newResults.map(d => d.shoppingCartNumber * d.price);
     setProducPrice(productsAdded ? productsAdded.reduce((a, b) => a + b, 0) : 0);
@@ -180,6 +192,23 @@ const Products = () => {
       variables: {
         productId: id,
         increment,
+      }
+    }).then(res => console.log(res))
+  }
+  const deleteItem = (id) => {
+    const newResults = [
+      ...results.filter(c => c.id !== id),
+      {
+        ...results.find(c => c.id === id),
+        shoppingCartNumber: 0,
+        isInShoppingCart: false,
+      }
+    ]
+    setResults(newResults);
+    updatePrice(newResults);
+    deleteShoppingCart({
+      variables: {
+        productId: id,
       }
     }).then(res => console.log(res))
   }
@@ -220,20 +249,20 @@ const Products = () => {
                       <p>{c.name}</p>
                       <p style={{ color: 'red' }}>{`$${c.price}`}</p>
                     </div>
-                    <p>
+                    <div>
                       <AddProductBox onClick={() => c.shoppingCartNumber ? null : handleClick(c.id)}>
-                        {c.shoppingCartNumber >= 1 ? (
+                        {c.shoppingCartNumber >= 1 && c.isInShoppingCart ? (
                           <span style={{ color: '#fff' }}>{c.shoppingCartNumber}</span>
                         ) : (
                           <PlusIcon />
                         )}
                       </AddProductBox>
-                      {c.shoppingCartNumber >= 1 && (
-                        <span>Delete</span>
+                      {c.shoppingCartNumber >= 1 && c.isInShoppingCart && (
+                        <div onClick={() => deleteItem(c.id)}><span>Delete</span></div>
                       )}
-                    </p>
+                    </div>
                   </ProductBox>
-                  {c.shoppingCartNumber > 1 && (
+                  {c.shoppingCartNumber > 1 && c.isInShoppingCart && (
                     <ProductBox>
                       <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16, opacity: 0.3 }}>
                         <p>{c.name}</p>
