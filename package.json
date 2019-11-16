@@ -7,7 +7,8 @@
     "dev": "NODE_ENV=development npx webpack-dev-server --mode development --hot --colors --progress",
     "build": "NODE_ENV=production npx webpack --mode production",
     "heroku-postbuild": "npm install --only=dev && npm install && npm run build",
-    "start": "nodemon server.js",
+    "start:dev": "nodemon server.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
