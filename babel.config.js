@@ -7,5 +7,6 @@ module.exports = {
   presets,
   plugins: [
     'babel-plugin-styled-components',
-  ],
+    '@babel/plugin-proposal-optional-chaining'
+  ]
 };

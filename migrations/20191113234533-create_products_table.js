@@ -31,6 +31,15 @@ module.exports = {
         type: Sequelize.INTEGER(10),
         allowNull: false
       },
+      isInShoppingCart: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false 
+      },
+      shoppingCartNumber: {
+        type: Sequelize.INTEGER(11),
+        allowNull: false,
+      },
       createdAt: Sequelize.DATE,
       updatedAt: Sequelize.DATE
     });

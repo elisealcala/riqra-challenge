@@ -23,5 +23,15 @@ module.exports = sequelize.define("Product", {
   price: {
     type: Sequelize.INTEGER(10),
     allowNull: false
+  },
+  isInShoppingCart: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: false 
+  },
+  shoppingCartNumber: {
+    type: Sequelize.INTEGER(11),
+    allowNull: false,
+    defaultValue: 0
   }
 });

@@ -10,21 +10,15 @@ const Product = require("./src/models/Product");
 
 
 const schema = buildSchema(`
-  type ShoppingCartItem {
+  type Product {
+    id: Int,
     name: String,
     brand: String,
     image: String,
     number: Int,
     price: Int,
-  },
-  type ShoppingCart {
-    shoppingCart: [ShoppingCartItem]
-  },
-  type Product {
-    name: String,
-    brand: String,
-    image: String,
-    price: Int,
+    isInShoppingCart: Boolean,
+    shoppingCartNumber: Int
   },
   type Query {
     products: [Product]
@@ -32,8 +26,16 @@ const schema = buildSchema(`
   input ProductInput {
     id: Int,
   },
+  input ShoppinCartInput {
+    id: Int,
+    increment: Boolean,
+  },
+  type Success {
+    success: Boolean,
+  }
   type Mutation {
-    addShoppingCart(params: [ProductInput]): Product
+    addShoppingCart(params: ShoppinCartInput): Success,
+    deleteShoppingCart(params: ProductInput): Success,
   }
 `);
 
@@ -41,8 +43,19 @@ const root = {
   products: () => {
     return Product.findAll().then(product => product);
   },
-  addShoppingCart: ({ params }) =>{
-    return Product.findByPk(params[0].id).then(product => product);
+  addShoppingCart: ({ params: { increment, id } }) => {
+    Product.update({
+      isInShoppingCart: true,
+    }, {
+      where: {
+        id: id,
+      }
+    });
+    if (increment) {
+      return Product.increment('shoppingCartNumber', { where: { id: id } }).then(() => ({ success: true }));
+    } else {
+      return Product.decrement('shoppingCartNumber', { where: { id: id } }).then(() => ({ success: true }));
+    }
   }
 };
 

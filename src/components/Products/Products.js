@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { gql } from 'apollo-boost';
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery, useMutation } from '@apollo/react-hooks';
 import styled from 'styled-components';
 import CartEmptyIcon from '../../ui/CartEmptyIcon';
 import TruckIcon from '../../ui/TruckIcon';
@@ -60,6 +60,7 @@ const EmptyContainer = styled.div`
 
 const ProductBox = styled.div`
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
@@ -75,6 +76,27 @@ const AddProductBox = styled.div`
   align-items: center;
   justify-content: center;
 `;
+
+const AddNumberBox = styled.div`
+  background: #FF8000;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #fff;
+  width: 180px;
+  height: 48px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  div {
+    height: 48px;
+    width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+`
 
 const ShippingBox = styled.div`
   background: #fff;
@@ -111,20 +133,56 @@ const PRODUCTS_QUERY = gql`
   query {
     products {
       brand
+      id
       name
       image
       price
+      isInShoppingCart
+      shoppingCartNumber
     }
   }
 `
 
+const SHOPPING_CART_MUTATION = gql`
+  mutation addShoppingCart($productId: Int!, $increment: Boolean){
+    addShoppingCart(params: {
+      id: $productId
+      increment: $increment,
+    }){
+      success
+    }
+  }
+`;
+
 const Products = () => {
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
+  const [productPrice, setProducPrice] = useState(0);
   const shippingDay = "04/04/04";
-  const productPrice = 20.00;
   const { loading, error, data } = useQuery(PRODUCTS_QUERY);
+  const [addShoppingCart] = useMutation(SHOPPING_CART_MUTATION);
+  const updatePrice = (newResults) => {
+    const productsAdded = newResults.map(d => d.shoppingCartNumber * d.price);
+    setProducPrice(productsAdded ? productsAdded.reduce((a, b) => a + b, 0) : 0);
+  }
   const handleSearch = e => setSearch(e.target.value);
+  const handleClick = (id, increment=true) => {
+    const newResults = [
+      ...results.filter(c => c.id !== id),
+      {
+        ...results.find(c => c.id === id),
+        shoppingCartNumber: increment ? results.find(c => c.id === id).shoppingCartNumber + 1 : results.find(c => c.id === id).shoppingCartNumber - 1,
+      }
+    ]
+    setResults(newResults);
+    updatePrice(newResults);
+    addShoppingCart({
+      variables: {
+        productId: id,
+        increment,
+      }
+    }).then(res => console.log(res))
+  }
 
   useEffect(() => {
     if (search === '') {
@@ -134,6 +192,13 @@ const Products = () => {
       setResults(data.products.filter(c => c.name.includes(search)));
     }
   }, [search])
+
+  useEffect(() => {
+    setResults(data && data.products ? data.products.filter(c => c.isInShoppingCart) : []);
+    updatePrice(results);
+  }, [data && data.products, results.length]);
+
+  const disabled = (productPrice + ((productPrice / 100) * 10)) < 50;
 
   return (
     <BackgroundContainer>
@@ -149,15 +214,41 @@ const Products = () => {
               </EmptyContainer>
             ) : (
               results.map(c => (
-                <ProductBox>
-                  <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16 }}>
-                    <p>{c.name}</p>
-                    <p style={{ color: 'red' }}>{`$${c.price}`}</p>
-                  </div>
-                  <AddProductBox>
-                    <PlusIcon />
-                  </AddProductBox>
-                </ProductBox>
+                <>
+                  <ProductBox>
+                    <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16 }}>
+                      <p>{c.name}</p>
+                      <p style={{ color: 'red' }}>{`$${c.price}`}</p>
+                    </div>
+                    <p>
+                      <AddProductBox onClick={() => c.shoppingCartNumber ? null : handleClick(c.id)}>
+                        {c.shoppingCartNumber >= 1 ? (
+                          <span style={{ color: '#fff' }}>{c.shoppingCartNumber}</span>
+                        ) : (
+                          <PlusIcon />
+                        )}
+                      </AddProductBox>
+                      {c.shoppingCartNumber >= 1 && (
+                        <span>Delete</span>
+                      )}
+                    </p>
+                  </ProductBox>
+                  {c.shoppingCartNumber > 1 && (
+                    <ProductBox>
+                      <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16, opacity: 0.3 }}>
+                        <p>{c.name}</p>
+                        <p style={{ color: 'red' }}>{`$${c.price}`}</p>
+                      </div>
+                      <AddNumberBox>
+                        <div onClick={() => handleClick(c.id, false)}>
+                          -
+                        </div>
+                        <span>{c.shoppingCartNumber}</span>
+                        <div onClick={() => handleClick(c.id, true)}> + </div>
+                      </AddNumberBox>
+                    </ProductBox>
+                  )}
+                </>
               ))
             )}
           </Cart>
@@ -170,22 +261,22 @@ const Products = () => {
           <ShippingBox>
             <FlexItem>
               <p>Products</p>
-              <p>{`$${productPrice}`}</p>
+              <p>{`$${parseFloat(productPrice).toFixed(2)}`}</p>
             </FlexItem>
             <FlexItem style={{ background: '#FFE200' }}>
               <p>Shipping Cost</p>
-              <p>{`$${productPrice}`}</p>
+              <p>{`$${parseFloat(((productPrice / 100) * 10)).toFixed(2)}`}</p>
             </FlexItem>
             <FlexItem>
               <p>Taxes</p>
-              <p>{`$${productPrice}`}</p>
+              <p>{`$${parseFloat(((productPrice / 100) * 18)).toFixed(2)}`}</p>
             </FlexItem>
             <FlexItem style={{ marginTop: 10 }}>
               <p>Total</p>
-              <p style={{ color: 'red' }}>{`$${productPrice}`}</p>
+              <p style={{ color: 'red' }}>{`$${parseFloat(productPrice + ((productPrice / 100) * 10)).toFixed(2)}`}</p>
             </FlexItem>
           </ShippingBox>
-          <Button disabled>
+          <Button disabled={disabled}>
             Complete Order
           </Button>
         </Container>
