@@ -8,7 +8,7 @@ module.exports = {
 
       Example:
       */
-     return queryInterface.bulkInsert('Products', [{
+     return queryInterface.bulkInsert('products', [{
        name: 'Yogurt Laive',
        brand: 'Laive',
        image: 'asdad',
@@ -45,6 +45,6 @@ module.exports = {
 
       Example:
       */
-     return queryInterface.bulkDelete('Products', null, {});
+     return queryInterface.bulkDelete('products', null, {});
   }
 };
