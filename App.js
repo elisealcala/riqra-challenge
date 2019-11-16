@@ -18,11 +18,10 @@ const App = () => {
       <GlobalStyle />
       <Router>
         <Switch>
-          <Route path="/">
+          <Route exact path="/thanks/:id" children={ThanksPage} />
+            {/* <ThanksPage /> */}
+          <Route path="/products">
             <Products />
-          </Route>
-          <Route path="/thankyou">
-            <ThanksPage />
           </Route>
         </Switch>
       </Router>

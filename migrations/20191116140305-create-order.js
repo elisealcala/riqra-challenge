@@ -8,10 +8,7 @@ module.exports = {
         primaryKey: true
       },
       items: {
-        type: Sequelize.INTEGER,
-      },
-      order: {
-        type: Sequelize.STRING(),
+        type: Sequelize.STRING(35),
       },
       createdAt: Sequelize.DATE,
       updatedAt: Sequelize.DATE

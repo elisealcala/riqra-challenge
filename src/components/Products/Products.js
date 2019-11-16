@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { withRouter } from 'react-router-dom';
 import { gql } from 'apollo-boost';
 import { useQuery, useMutation } from '@apollo/react-hooks';
 import styled from 'styled-components';
@@ -162,9 +163,19 @@ const DELETE_SHOPPING_CART = gql`
       success
     }
   }
+`;
+
+const CREATE_ORDER_MUTATION = gql`
+  mutation createOrder($itemId: String!){
+    createOrder(params: {
+      id: $itemId
+    }){
+      success
+    }
+  }
 `
 
-const Products = () => {
+const Products = ({ history }) => {
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
   const [productPrice, setProducPrice] = useState(0);
@@ -172,17 +183,22 @@ const Products = () => {
   const { loading, error, data } = useQuery(PRODUCTS_QUERY);
   const [addShoppingCart] = useMutation(SHOPPING_CART_MUTATION);
   const [deleteShoppingCart] = useMutation(DELETE_SHOPPING_CART);
+  const [createOrder] = useMutation(CREATE_ORDER_MUTATION);
 
   const updatePrice = (newResults) => {
     const productsAdded = newResults.map(d => d.shoppingCartNumber * d.price);
     setProducPrice(productsAdded ? productsAdded.reduce((a, b) => a + b, 0) : 0);
   }
-  const handleSearch = e => setSearch(e.target.value);
+  const handleSearch = e => {
+    setSearch(e.target.value);
+    setResults(data.products.filter(c => c.name.includes(search)));
+  }
   const handleClick = (id, increment=true) => {
     const newResults = [
       ...results.filter(c => c.id !== id),
       {
         ...results.find(c => c.id === id),
+        isInShoppingCart: true,
         shoppingCartNumber: increment ? results.find(c => c.id === id).shoppingCartNumber + 1 : results.find(c => c.id === id).shoppingCartNumber - 1,
       }
     ]
@@ -215,17 +231,10 @@ const Products = () => {
 
   useEffect(() => {
     if (search === '') {
-      setResults([]);
+      setResults(data && data.products ? data.products.filter(c => c.isInShoppingCart) : []);
+      updatePrice(results);
     }
-    if (data && data.products && search !== '') {
-      setResults(data.products.filter(c => c.name.includes(search)));
-    }
-  }, [search])
-
-  useEffect(() => {
-    setResults(data && data.products ? data.products.filter(c => c.isInShoppingCart) : []);
-    updatePrice(results);
-  }, [data && data.products, results.length]);
+  }, [data && data.products, results.length, search]);
 
   const disabled = (productPrice + ((productPrice / 100) * 10)) < 50;
 
@@ -262,7 +271,7 @@ const Products = () => {
                       )}
                     </div>
                   </ProductBox>
-                  {c.shoppingCartNumber > 1 && c.isInShoppingCart && (
+                  {c.shoppingCartNumber >= 1 && c.isInShoppingCart && (
                     <ProductBox>
                       <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16, opacity: 0.3 }}>
                         <p>{c.name}</p>
@@ -305,7 +314,23 @@ const Products = () => {
               <p style={{ color: 'red' }}>{`$${parseFloat(productPrice + ((productPrice / 100) * 10)).toFixed(2)}`}</p>
             </FlexItem>
           </ShippingBox>
-          <Button disabled={disabled}>
+          <Button
+            disabled={disabled}
+            onClick={() => {
+              if (!disabled) {
+                const currentDate = Date.now().toString();
+                createOrder({
+                  variables: {
+                    itemId: currentDate,
+                  }
+                }).then(() =>{
+                  history.push({
+                    pathname: `/thanks/${currentDate}`,
+                  });
+                })
+              }
+            }}
+          >
             Complete Order
           </Button>
         </Container>
@@ -314,4 +339,4 @@ const Products = () => {
   )
 }
 
-export default Products;
+export default withRouter(Products);

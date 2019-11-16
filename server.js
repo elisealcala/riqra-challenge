@@ -7,7 +7,7 @@ const { buildSchema } = require('graphql');
 const bodyParser = require('body-parser');
 const cors = require('cors')
 const Product = require("./src/models/Product");
-
+const Orders = require("./src/models/Orders");
 
 const schema = buildSchema(`
   type Product {
@@ -20,11 +20,19 @@ const schema = buildSchema(`
     isInShoppingCart: Boolean,
     shoppingCartNumber: Int
   },
+  type Order {
+    id: Int,
+    items: String,
+  },
   type Query {
-    products: [Product]
+    products: [Product],
+    order(params: ProductOrderInput): Order,
   },
   input ProductInput {
     id: Int,
+  },
+  input ProductOrderInput {
+    id: String,
   },
   input ShoppinCartInput {
     id: Int,
@@ -36,10 +44,14 @@ const schema = buildSchema(`
   type Mutation {
     addShoppingCart(params: ShoppinCartInput): Success,
     deleteShoppingCart(params: ProductInput): Success,
+    createOrder(params: ProductOrderInput): Success,
   }
 `);
 
 const root = {
+  order: ({ params: { id } }) => {
+    return Orders.findOne({ where: { items: id} }).then(product => product);
+  },
   products: () => {
     return Product.findAll().then(product => product);
   },
@@ -66,6 +78,15 @@ const root = {
     } else {
       return Product.decrement('shoppingCartNumber', { where: { id: id } }).then(() => ({ success: true }));
     }
+  },
+  createOrder: ({
+    params: { id },
+  }) => {
+    return Orders.create({
+      items: id,
+    }).then(() => ({
+      sucess: true,
+    }))
   }
 };
 

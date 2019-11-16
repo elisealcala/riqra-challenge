@@ -1,13 +1,12 @@
 const sequelize = require("../database/connection");
 const Sequelize = require("sequelize");
 
-module.exports = () => {
-  const Order = sequelize.define('Order', {
-    items: Sequelize.INTEGER,
-    order: Sequelize.STRING
-  }, {});
-  Order.associate = function(models) {
-    // associations can be defined here
-  };
-  return Order;
-};
+module.exports = sequelize.define('Order', {
+  items: Sequelize.STRING(35),
+  id: {
+    type: Sequelize.INTEGER(11),
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true
+  },
+});
