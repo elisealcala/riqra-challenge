@@ -47,7 +47,7 @@ const Cart = styled.div`
   flex-direction: column;
   min-height: 480px;
   max-height: 480px;
-    overflow: scroll;
+  overflow: scroll;
 `;
 
 const EmptyContainer = styled.div`
@@ -56,10 +56,11 @@ const EmptyContainer = styled.div`
   text-align: center;
   align-items: center;
   padding: 50px 10px;
-  & h3, p {
+  & h3,
+  p {
     margin: 10px 0 10px 0;
   }
-`
+`;
 
 const ProductBox = styled.div`
   display: flex;
@@ -71,7 +72,7 @@ const ProductBox = styled.div`
 `;
 
 const AddProductBox = styled.div`
-  background: #FF8000;
+  background: #ff8000;
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -81,7 +82,7 @@ const AddProductBox = styled.div`
 `;
 
 const AddNumberBox = styled.div`
-  background: #FF8000;
+  background: #ff8000;
   position: absolute;
   top: 10px;
   right: 10px;
@@ -99,7 +100,7 @@ const AddNumberBox = styled.div`
     align-items: center;
     justify-content: center;
   }
-`
+`;
 
 const ShippingBox = styled.div`
   background: #fff;
@@ -122,9 +123,11 @@ const Button = styled.button`
   margin-top: 20px;
   font-size: 20px;
   padding: 14px;
-  background: #FF8000;
+  background: #ff8000;
   color: #fff;
-  ${({ disabled }) => disabled && `
+  ${({ disabled }) =>
+    disabled &&
+    `
     opacity: 0.5;
     color: #a9a8a8;
     border: 1px solid #a9a8a8;
@@ -144,107 +147,113 @@ const PRODUCTS_QUERY = gql`
       shoppingCartNumber
     }
   }
-`
+`;
 
 const SHOPPING_CART_MUTATION = gql`
-  mutation addShoppingCart($productId: Int!, $increment: Boolean){
-    addShoppingCart(params: {
-      id: $productId
-      increment: $increment,
-    }){
+  mutation addShoppingCart($productId: Int!, $increment: Boolean) {
+    addShoppingCart(params: { id: $productId, increment: $increment }) {
       success
     }
   }
 `;
 
 const DELETE_SHOPPING_CART = gql`
-  mutation deleteShoppingCart($productId: Int!){
-    deleteShoppingCart(params: {
-      id: $productId
-    }){
+  mutation deleteShoppingCart($productId: Int!) {
+    deleteShoppingCart(params: { id: $productId }) {
       success
     }
   }
 `;
 
 const CREATE_ORDER_MUTATION = gql`
-  mutation createOrder($itemId: String!){
-    createOrder(params: {
-      id: $itemId
-    }){
+  mutation createOrder($itemId: String!) {
+    createOrder(params: { id: $itemId }) {
       success
     }
   }
-`
+`;
 
 const Products = ({ history }) => {
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
   const [productPrice, setProducPrice] = useState(0);
-  const shippingDay = "04/04/04";
+  const shippingDay = '04/04/04';
   const { loading, error, data } = useQuery(PRODUCTS_QUERY);
   const [addShoppingCart] = useMutation(SHOPPING_CART_MUTATION);
   const [deleteShoppingCart] = useMutation(DELETE_SHOPPING_CART);
   const [createOrder] = useMutation(CREATE_ORDER_MUTATION);
 
-  const updatePrice = (newResults) => {
+  const updatePrice = newResults => {
     const productsAdded = newResults.map(d => d.shoppingCartNumber * d.price);
-    setProducPrice(productsAdded ? productsAdded.reduce((a, b) => a + b, 0) : 0);
-  }
+    setProducPrice(
+      productsAdded ? productsAdded.reduce((a, b) => a + b, 0) : 0,
+    );
+  };
   const handleSearch = e => {
     setSearch(e.target.value);
     setResults(data.products.filter(c => c.name.includes(search)));
-  }
-  const handleClick = (id, increment=true) => {
+  };
+  const handleClick = (id, increment = true) => {
     const newResults = [
       ...results.filter(c => c.id !== id),
       {
         ...results.find(c => c.id === id),
         isInShoppingCart: true,
-        shoppingCartNumber: increment ? results.find(c => c.id === id).shoppingCartNumber + 1 : results.find(c => c.id === id).shoppingCartNumber - 1,
-      }
-    ]
+        shoppingCartNumber: increment
+          ? results.find(c => c.id === id).shoppingCartNumber + 1
+          : results.find(c => c.id === id).shoppingCartNumber - 1,
+      },
+    ];
     setResults(newResults);
     updatePrice(newResults);
     addShoppingCart({
       variables: {
         productId: id,
         increment,
-      }
-    }).then(res => console.log(res))
-  }
-  const deleteItem = (id) => {
+      },
+    }).then(res => console.log(res));
+  };
+  const deleteItem = id => {
     const newResults = [
       ...results.filter(c => c.id !== id),
       {
         ...results.find(c => c.id === id),
         shoppingCartNumber: 0,
         isInShoppingCart: false,
-      }
-    ]
+      },
+    ];
     setResults(newResults);
     updatePrice(newResults);
     deleteShoppingCart({
       variables: {
         productId: id,
-      }
-    }).then(res => console.log(res))
-  }
+      },
+    }).then(res => console.log(res));
+  };
 
   useEffect(() => {
     if (search === '') {
-      setResults(data && data.products ? data.products.filter(c => c.isInShoppingCart) : []);
+      setResults(
+        data && data.products
+          ? data.products.filter(c => c.isInShoppingCart)
+          : [],
+      );
       updatePrice(results);
     }
   }, [data && data.products, results.length, search]);
 
-  const disabled = (productPrice + ((productPrice / 100) * 10)) < 50;
+  const disabled = productPrice + (productPrice / 100) * 10 < 50;
 
   return (
     <BackgroundContainer>
       <MainContainer>
         <Container>
-          <SearchBox value={search} onChange={handleSearch} placeholder="Search products" />
+          <SearchBox
+            value={search}
+            onChange={handleSearch}
+            placeholder="Search products"
+          />
+          <h1>asdasdas</h1>
           <Cart>
             {results.length === 0 ? (
               <EmptyContainer>
@@ -256,33 +265,52 @@ const Products = ({ history }) => {
               results.map(c => (
                 <>
                   <ProductBox>
-                    <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        marginLeft: 16,
+                      }}
+                    >
                       <p>{c.name}</p>
                       <p style={{ color: 'red' }}>{`$${c.price}`}</p>
                     </div>
                     <div>
-                      <AddProductBox onClick={() => c.shoppingCartNumber ? null : handleClick(c.id)}>
+                      <AddProductBox
+                        onClick={() =>
+                          c.shoppingCartNumber ? null : handleClick(c.id)
+                        }
+                      >
                         {c.shoppingCartNumber >= 1 && c.isInShoppingCart ? (
-                          <span style={{ color: '#fff' }}>{c.shoppingCartNumber}</span>
+                          <span style={{ color: '#fff' }}>
+                            {c.shoppingCartNumber}
+                          </span>
                         ) : (
                           <PlusIcon />
                         )}
                       </AddProductBox>
                       {c.shoppingCartNumber >= 1 && c.isInShoppingCart && (
-                        <div onClick={() => deleteItem(c.id)}><span>Delete</span></div>
+                        <div onClick={() => deleteItem(c.id)}>
+                          <span>Delete</span>
+                        </div>
                       )}
                     </div>
                   </ProductBox>
                   {c.shoppingCartNumber >= 1 && c.isInShoppingCart && (
                     <ProductBox>
-                      <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 16, opacity: 0.3 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          marginLeft: 16,
+                          opacity: 0.3,
+                        }}
+                      >
                         <p>{c.name}</p>
                         <p style={{ color: 'red' }}>{`$${c.price}`}</p>
                       </div>
                       <AddNumberBox>
-                        <div onClick={() => handleClick(c.id, false)}>
-                          -
-                        </div>
+                        <div onClick={() => handleClick(c.id, false)}>-</div>
                         <span>{c.shoppingCartNumber}</span>
                         <div onClick={() => handleClick(c.id, true)}> + </div>
                       </AddNumberBox>
@@ -294,9 +322,17 @@ const Products = ({ history }) => {
           </Cart>
         </Container>
         <Container>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             <TruckIcon />
-            <p style={{ marginLeft: 5 }}>{`Buy now and get it by ${shippingDay}`}</p>
+            <p
+              style={{ marginLeft: 5 }}
+            >{`Buy now and get it by ${shippingDay}`}</p>
           </div>
           <ShippingBox>
             <FlexItem>
@@ -305,15 +341,17 @@ const Products = ({ history }) => {
             </FlexItem>
             <FlexItem style={{ background: '#FFE200' }}>
               <p>Shipping Cost</p>
-              <p>{`$${parseFloat(((productPrice / 100) * 10)).toFixed(2)}`}</p>
+              <p>{`$${parseFloat((productPrice / 100) * 10).toFixed(2)}`}</p>
             </FlexItem>
             <FlexItem>
               <p>Taxes</p>
-              <p>{`$${parseFloat(((productPrice / 100) * 18)).toFixed(2)}`}</p>
+              <p>{`$${parseFloat((productPrice / 100) * 18).toFixed(2)}`}</p>
             </FlexItem>
             <FlexItem style={{ marginTop: 10 }}>
               <p>Total</p>
-              <p style={{ color: 'red' }}>{`$${parseFloat(productPrice + ((productPrice / 100) * 10)).toFixed(2)}`}</p>
+              <p style={{ color: 'red' }}>{`$${parseFloat(
+                productPrice + (productPrice / 100) * 10,
+              ).toFixed(2)}`}</p>
             </FlexItem>
           </ShippingBox>
           <Button
@@ -324,12 +362,12 @@ const Products = ({ history }) => {
                 createOrder({
                   variables: {
                     itemId: currentDate,
-                  }
-                }).then(() =>{
+                  },
+                }).then(() => {
                   history.push({
                     pathname: `/thanks/${currentDate}`,
                   });
-                })
+                });
               }
             }}
           >
@@ -338,7 +376,7 @@ const Products = ({ history }) => {
         </Container>
       </MainContainer>
     </BackgroundContainer>
-  )
-}
+  );
+};
 
 export default withRouter(Products);
