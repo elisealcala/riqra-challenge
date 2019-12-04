@@ -259,7 +259,7 @@ const Products = ({ history }) => {
               <EmptyContainer>
                 <CartEmptyIcon color="#333" />
                 <h3>Your cart is empty</h3>
-                <p>Seems like you haven't chosen what to buy</p>
+                <p>Seems like you haven&apos;t chosen what to buy</p>
               </EmptyContainer>
             ) : (
               results.map(c => (

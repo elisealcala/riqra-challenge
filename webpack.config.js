@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 // const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
@@ -15,8 +18,8 @@ module.exports = {
             cacheDirectory: true,
           },
         },
-      }
-    ]
+      },
+    ],
   },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -37,7 +40,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'index.html'),
     }),
+    new CleanWebpackPlugin(),
   ],
   // target: 'node',
   // externals: [nodeExternals()],
-}
+};
