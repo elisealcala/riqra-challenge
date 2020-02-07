@@ -3,16 +3,12 @@
     "javascript",
     "javascriptreact",
     "Babel Javascript",
-    {
-        "language": "typescript",
-        "autoFix": true
-    },
-    {
-        "language": "typescriptreact",
-        "autoFix": true
-    }
+    "typescript",
+    "typescriptreact",
   ],
-  "eslint.autoFixOnSave": true,
   "eslint.alwaysShowStatus": true,
   "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
 }
